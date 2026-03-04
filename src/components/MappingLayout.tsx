@@ -44,11 +44,12 @@ export default function MappingLayout() {
   };
 
   return (
-    <div className="flex min-h-screen">
-      {/* Sidebar */}
-      <aside className="no-print w-64 shrink-0 bg-sidebar-background text-sidebar-foreground flex flex-col">
+    <div className="flex min-h-screen bg-background">
+      {/* Sidebar - Oculta na impressão */}
+      <aside className="no-print w-64 shrink-0 bg-sidebar-background text-sidebar-foreground flex flex-col border-r border-sidebar-border">
         <div className="p-6 border-b border-sidebar-border">
-          <h1 className="text-lg font-bold tracking-tight text-sidebar-primary-foreground">
+          {/* AJUSTE: Mudei a cor para azul aqui (text-blue-600) */}
+          <h1 className="text-xl font-bold tracking-tight text-blue-600">
             Audaces
           </h1>
           <p className="text-xs text-sidebar-foreground/70 mt-1">
@@ -77,9 +78,9 @@ export default function MappingLayout() {
                   className={cn(
                     "flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold shrink-0",
                     isComplete
-                      ? "bg-[hsl(var(--step-complete))] text-white"
+                      ? "bg-green-600 text-white"
                       : isActive
-                      ? "bg-[hsl(var(--step-active))] text-white"
+                      ? "bg-blue-600 text-white"
                       : "bg-sidebar-border text-sidebar-foreground/60"
                   )}
                 >
@@ -110,13 +111,14 @@ export default function MappingLayout() {
             onClick={() => window.print()}
           >
             <Printer className="w-4 h-4 mr-2" />
-            Imprimir / PDF
+            Gerar Relatório Completo
           </Button>
         </div>
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 flex flex-col">
+      <main className="flex-1 flex flex-col min-w-0">
+        {/* Header - Oculto na impressão */}
         <header className="no-print border-b px-6 py-3 flex items-center justify-between bg-card">
           <div>
             <p className="text-xs text-muted-foreground">
@@ -136,7 +138,7 @@ export default function MappingLayout() {
               <ChevronLeft className="w-4 h-4 mr-1" />
               Anterior
             </Button>
-            <Button size="sm" onClick={markComplete}>
+            <Button size="sm" onClick={markComplete} className="bg-blue-600 hover:bg-blue-700">
               {currentStep < steps.length - 1 ? (
                 <>
                   Concluir e Avançar
@@ -149,8 +151,27 @@ export default function MappingLayout() {
           </div>
         </header>
 
-        <div className="flex-1 overflow-auto p-6">
+        {/* Conteúdo da Etapa Atual - Visível apenas na tela */}
+        <div className="flex-1 overflow-auto p-6 print:hidden">
           <StepComponent />
+        </div>
+
+        {/* VISUAL DE IMPRESSÃO - Visível apenas no papel/PDF */}
+        <div className="hidden print:block p-8 space-y-12">
+          <div className="text-center border-b pb-6">
+            <h1 className="text-3xl font-bold text-blue-600">Audaces</h1>
+            <h2 className="text-xl text-gray-600">Relatório de Mapeamento de Dados ERP</h2>
+          </div>
+          
+          {stepComponents.map((Component, index) => (
+            <div key={index} className="space-y-4">
+              <h3 className="text-xl font-bold border-l-4 border-blue-600 pl-3">
+                {steps[index].id}. {steps[index].title}
+              </h3>
+              <Component />
+              <div className="page-break" /> {/* Quebra página entre seções se necessário */}
+            </div>
+          ))}
         </div>
       </main>
     </div>
