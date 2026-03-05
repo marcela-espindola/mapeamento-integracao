@@ -101,14 +101,73 @@
   }
 }
 
+/* --- AJUSTES DE IMPRESSÃO (PDF) --- */
 @media print {
-  .no-print {
+  @page {
+    size: A4;
+    margin: 1.5cm;
+  }
+
+  /* Esconde marca d'água da Lovable e outros selos fixos */
+  .lovable-badge, 
+  [data-lovable-badge], 
+  #lovable-badge,
+  .fixed.bottom-4.right-4 {
     display: none !important;
   }
-  .print-break {
-    page-break-before: always;
+
+  /* Oculta Sidebar, Header e Botões na hora de gerar o PDF */
+  .no-print, 
+  aside, 
+  header, 
+  button, 
+  [role="tablist"] {
+    display: none !important;
   }
+
+  /* FORÇA A QUEBRA DE PÁGINA: Use a classe .pdf-page no seu MappingLayout.tsx */
+  .pdf-page {
+    page-break-before: always !important;
+    break-before: page !important;
+    display: block !important;
+    width: 100% !important;
+    padding-top: 1cm;
+    clear: both;
+  }
+
+  /* Impede página em branco no início */
+  .pdf-page:first-child {
+    page-break-before: avoid !important;
+    break-before: avoid !important;
+    padding-top: 0;
+  }
+
+  /* Força cores nítidas no PDF */
   body {
+    background-color: white !important;
     font-size: 11pt;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
+
+  /* Impede que tabelas e cards quebrem ao meio entre páginas */
+  table, tr, td, .card {
+    page-break-inside: avoid !important;
+  }
+}
+
+/* --- AJUSTES DE VISIBILIDADE (TELA) --- */
+
+/* Escurece o cinza dos passos inativos na barra lateral para melhor leitura */
+.text-gray-600, .text-muted-foreground {
+  color: #4b5563 !important; /* Cor #4b5563 conforme solicitado */
+}
+
+/* Estilo para garantir que o azul corporativo #283578 seja aplicado corretamente */
+.text-corporate-blue {
+  color: #283578;
+}
+
+.bg-corporate-blue {
+  background-color: #283578;
 }
