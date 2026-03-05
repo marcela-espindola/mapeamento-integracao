@@ -4,7 +4,6 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Monitor, Plus } from "lucide-react";
 
@@ -20,60 +19,76 @@ const categories = [
 const dataTypes = ["Texto", "Número", "Data", "Lista/Enum", "Booleano", "Código"];
 
 export default function Step5ErpScreens({ data = [], update, isPrint }: any) {
-  // Estado local para controlar as linhas de cada aba
   const [localRows, setLocalRows] = useState<any[]>(data.length > 0 ? data : []);
 
-  // Inicializa com algumas linhas vazias se estiver totalmente vazio
   useEffect(() => {
     if (localRows.length === 0) {
       const initial = categories.flatMap(cat => 
-        cat.fields.slice(0, 3).map(f => ({ category: cat.key, tela: "", campo: f, tipo: "", obrigatorio: "" }))
+        cat.fields.slice(0, 3).map(f => ({ 
+          category: cat.key, 
+          categoryLabel: cat.label,
+          tela: "", 
+          campo: f, 
+          tipo: "", 
+          obrigatorio: "" 
+        }))
       );
       setLocalRows(initial);
+      update(initial);
     }
   }, []);
 
   const handleInputChange = (index: number, field: string, value: string) => {
     const updated = [...localRows];
-    // Se a linha não existe no array ainda (caso de adicionar linha), nós a criamos
-    if (!updated[index]) updated[index] = { category: "produto", tela: "", campo: "", tipo: "", obrigatorio: "" };
+    if (!updated[index]) return;
     
     updated[index][field] = value;
     setLocalRows(updated);
 
-    // Envia para o MappingLayout apenas as linhas que têm "Tela" ou "Campo" preenchidos
-    const filledRows = updated.filter(row => row.tela?.trim() !== "" || row.campo?.trim() !== "");
+    // Envia para o MappingLayout filtrar e contar para a validação
+    const filledRows = updated.filter(row => row.tela && row.tela.trim() !== "");
     update(filledRows);
   };
 
-  const addRow = (categoryKey: string) => {
-    setLocalRows([...localRows, { category: categoryKey, tela: "", campo: "", tipo: "", obrigatorio: "" }]);
+  const addRow = (categoryKey: string, categoryLabel: string) => {
+    const newRow = { category: categoryKey, categoryLabel, tela: "", campo: "", tipo: "", obrigatorio: "" };
+    const updated = [...localRows, newRow];
+    setLocalRows(updated);
   };
 
   if (isPrint) {
+    const rowsToPrint = localRows.filter(r => r.tela && r.tela.trim() !== "");
     return (
       <div className="space-y-6">
-        <h3 className="text-xl font-bold" style={{ color: CORPORATE_BLUE }}>3. Telas e Campos do ERP</h3>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Categoria</TableHead>
-              <TableHead>Módulo / Tela</TableHead>
-              <TableHead>Campo no ERP</TableHead>
-              <TableHead>Tipo / Obrig.</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {localRows.filter(r => r.tela).map((row, i) => (
-              <TableRow key={i}>
-                <TableCell className="font-bold">{row.category}</TableCell>
-                <TableCell>{row.tela}</TableCell>
-                <TableCell>{row.campo}</TableCell>
-                <TableCell>{row.tipo} ({row.obrigatorio === 'S' ? 'Sim' : 'Não'})</TableCell>
+        <div className="border-b-2 pb-2" style={{ borderColor: CORPORATE_BLUE }}>
+          <h2 className="text-xl font-bold" style={{ color: CORPORATE_BLUE }}>3. Telas e Campos do ERP</h2>
+        </div>
+        {rowsToPrint.length > 0 ? (
+          <Table>
+            <TableHeader>
+              <TableRow className="border-b border-slate-300">
+                <TableHead className="text-black font-bold">Categoria</TableHead>
+                <TableHead className="text-black font-bold">Módulo / Tela</TableHead>
+                <TableHead className="text-black font-bold">Campo no ERP</TableHead>
+                <TableHead className="text-black font-bold">Tipo / Obrig.</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {rowsToPrint.map((row, i) => (
+                <TableRow key={i} className="border-b border-slate-100">
+                  <TableCell className="font-bold text-slate-900">{row.categoryLabel || row.category}</TableCell>
+                  <TableCell className="text-slate-700">{row.tela}</TableCell>
+                  <TableCell className="text-slate-700">{row.campo}</TableCell>
+                  <TableCell className="text-slate-700">
+                    {row.tipo} {row.obrigatorio === 'S' ? '(Obrigatório)' : ''}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        ) : (
+          <p className="text-slate-500 italic text-sm">Nenhuma tela ou campo foi mapeado.</p>
+        )}
       </div>
     );
   }
@@ -86,7 +101,7 @@ export default function Step5ErpScreens({ data = [], update, isPrint }: any) {
             <Monitor className="w-5 h-5" /> Instruções
           </CardTitle>
           <CardDescription>
-            Liste as telas do ERP envolvidas. Preencha ao menos <strong>3 campos no total</strong> para prosseguir.
+            Liste as telas do ERP. As 3 primeiras linhas de cada aba são obrigatórias para o mapeamento mínimo.
           </CardDescription>
         </CardHeader>
       </Card>
@@ -97,7 +112,7 @@ export default function Step5ErpScreens({ data = [], update, isPrint }: any) {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="produto">
-            <TabsList className="flex flex-wrap h-auto gap-1 bg-slate-100 p-1">
+            <TabsList className="flex flex-wrap h-auto gap-1 bg-slate-100 p-1 mb-4">
               {categories.map((cat) => (
                 <TabsTrigger key={cat.key} value={cat.key} className="text-xs px-4">
                   {cat.label}
@@ -105,86 +120,95 @@ export default function Step5ErpScreens({ data = [], update, isPrint }: any) {
               ))}
             </TabsList>
 
-            {categories.map((cat) => (
-              <TabsContent key={cat.key} value={cat.key} className="mt-4 animate-in fade-in duration-300">
-                <p className="text-xs text-muted-foreground mb-4">
-                  Sugestões para {cat.label}: <span className="italic">{cat.fields.join(", ")}</span>
-                </p>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Módulo / Tela <span className="text-red-500">*</span></TableHead>
-                      <TableHead>Campo no ERP <span className="text-red-500">*</span></TableHead>
-                      <TableHead>Tipo de Dado <span className="text-red-500">*</span></TableHead>
-                      <TableHead className="w-24">Obrig. <span className="text-red-500">*</span></TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {localRows.map((row, i) => {
-                      if (row.category !== cat.key) return null;
-                      return (
-                        <TableRow key={i}>
-                          <TableCell>
-                            <Input 
-                              placeholder="Ex: Cadastro de Produto" 
-                              className="text-xs" 
-                              value={row.tela || ""}
-                              onChange={(e) => handleInputChange(i, "tela", e.target.value)}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Input 
-                              placeholder="Nome do campo" 
-                              className="text-xs" 
-                              value={row.campo || ""}
-                              onChange={(e) => handleInputChange(i, "campo", e.target.value)}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Select 
-                              value={row.tipo || ""} 
-                              onValueChange={(v) => handleInputChange(i, "tipo", v)}
-                            >
-                              <SelectTrigger className="text-xs">
-                                <SelectValue placeholder="Tipo" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {dataTypes.map((t) => (
-                                  <SelectItem key={t} value={t}>{t}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </TableCell>
-                          <TableCell>
-                            <Select 
-                              value={row.obrigatorio || ""} 
-                              onValueChange={(v) => handleInputChange(i, "obrigatorio", v)}
-                            >
-                              <SelectTrigger className="text-xs">
-                                <SelectValue placeholder="S/N" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="S">Sim</SelectItem>
-                                <SelectItem value="N">Não</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
+            {categories.map((cat) => {
+              let categoryRowCount = 0;
+              return (
+                <TabsContent key={cat.key} value={cat.key} className="animate-in fade-in duration-300">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="text-slate-900">Módulo / Tela</TableHead>
+                        <TableHead className="text-slate-900">Campo no ERP</TableHead>
+                        <TableHead className="text-slate-900">Tipo de Dado</TableHead>
+                        <TableHead className="w-24 text-slate-900">Obrig.</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {localRows.map((row, i) => {
+                        if (row.category !== cat.key) return null;
+                        
+                        const isRequired = categoryRowCount < 3;
+                        categoryRowCount++;
+                        const inputClass = isRequired ? "pr-6 border-orange-200 shadow-sm" : "text-xs";
 
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="mt-3 border-dashed border-slate-300"
-                  onClick={() => addRow(cat.key)}
-                >
-                  <Plus className="w-4 h-4 mr-1" /> Adicionar linha em {cat.label}
-                </Button>
-              </TabsContent>
-            ))}
+                        return (
+                          <TableRow key={i}>
+                            <TableCell className="p-2 relative">
+                              <Input 
+                                placeholder="Ex: Cadastro" 
+                                className={inputClass} 
+                                value={row.tela || ""}
+                                onChange={(e) => handleInputChange(i, "tela", e.target.value)}
+                              />
+                              {isRequired && <span className="absolute right-4 top-1/2 -translate-y-1/2 text-red-500 font-bold text-xs">*</span>}
+                            </TableCell>
+                            <TableCell className="p-2 relative">
+                              <Input 
+                                placeholder="Campo" 
+                                className={inputClass} 
+                                value={row.campo || ""}
+                                onChange={(e) => handleInputChange(i, "campo", e.target.value)}
+                              />
+                              {isRequired && <span className="absolute right-4 top-1/2 -translate-y-1/2 text-red-500 font-bold text-xs">*</span>}
+                            </TableCell>
+                            <TableCell className="p-2 relative">
+                              <Select 
+                                value={row.tipo || ""} 
+                                onValueChange={(v) => handleInputChange(i, "tipo", v)}
+                              >
+                                <SelectTrigger className={`h-9 text-xs ${isRequired ? "border-orange-200 shadow-sm" : ""}`}>
+                                  <SelectValue placeholder="Tipo" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {dataTypes.map((t) => (
+                                    <SelectItem key={t} value={t}>{t}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              {isRequired && <span className="absolute right-8 top-1/2 -translate-y-1/2 text-red-500 font-bold text-xs z-10">*</span>}
+                            </TableCell>
+                            <TableCell className="p-2 relative">
+                              <Select 
+                                value={row.obrigatorio || ""} 
+                                onValueChange={(v) => handleInputChange(i, "obrigatorio", v)}
+                              >
+                                <SelectTrigger className={`h-9 text-xs ${isRequired ? "border-orange-200 shadow-sm" : ""}`}>
+                                  <SelectValue placeholder="S/N" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="S">Sim</SelectItem>
+                                  <SelectItem value="N">Não</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              {isRequired && <span className="absolute right-8 top-1/2 -translate-y-1/2 text-red-500 font-bold text-xs z-10">*</span>}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-4 border-dashed border-slate-300 w-full text-xs"
+                    onClick={() => addRow(cat.key, cat.label)}
+                  >
+                    <Plus className="w-3 h-3 mr-1" /> Adicionar nova linha em {cat.label}
+                  </Button>
+                </TabsContent>
+              );
+            })}
           </Tabs>
         </CardContent>
       </Card>
