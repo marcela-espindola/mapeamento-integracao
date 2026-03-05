@@ -172,7 +172,7 @@ export default function MappingLayout() {
         isMobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
       )}>
         <div className="hidden md:block pt-6 pb-4 px-4 border-b">
-          <img src="logo-audaces.png" alt="Audaces" className="h-14 w-auto mb-2 object-contain" />
+          <img src="logo-audaces.png" alt="Audaces" className="h-10 w-auto mb-2 object-contain" />
           <p className="text-sm font-bold" style={{ color: CORPORATE_BLUE }}>Mapeamento de Dados ERP</p>
         </div>
         
