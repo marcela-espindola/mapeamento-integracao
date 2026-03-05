@@ -108,24 +108,22 @@
     margin: 1.5cm;
   }
 
-  /* Esconde marca d'água da Lovable e outros selos fixos */
+  /* 1. ESCONDE O CARD DE SUCESSO E ELEMENTOS DE TELA */
+  .no-print, 
+  aside, 
+  header, 
+  button, 
+  [role="tablist"],
   .lovable-badge, 
   [data-lovable-badge], 
   #lovable-badge,
   .fixed.bottom-4.right-4 {
     display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
   }
 
-  /* Oculta Sidebar, Header e Botões na hora de gerar o PDF */
-  .no-print, 
-  aside, 
-  header, 
-  button, 
-  [role="tablist"] {
-    display: none !important;
-  }
-
-  /* FORÇA A QUEBRA DE PÁGINA: Use a classe .pdf-page no seu MappingLayout.tsx */
+  /* 2. FORÇA A QUEBRA DE PÁGINA EM CADA ETAPA */
   .pdf-page {
     page-break-before: always !important;
     break-before: page !important;
@@ -135,19 +133,24 @@
     clear: both;
   }
 
-  /* Impede página em branco no início */
+  /* Impede página em branco antes da primeira etapa */
   .pdf-page:first-child {
     page-break-before: avoid !important;
     break-before: avoid !important;
     padding-top: 0;
   }
 
-  /* Força cores nítidas no PDF */
-  body {
+  /* 3. RESET DE LAYOUT PARA PDF */
+  body, html {
     background-color: white !important;
-    font-size: 11pt;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  body {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+    color-adjust: exact !important;
   }
 
   /* Impede que tabelas e cards quebrem ao meio entre páginas */
@@ -156,14 +159,16 @@
   }
 }
 
-/* --- AJUSTES DE VISIBILIDADE (TELA) --- */
+/* --- AJUSTES VISUAIS DA TELA --- */
 
 /* Escurece o cinza dos passos inativos na barra lateral para melhor leitura */
-.text-gray-600, .text-muted-foreground {
-  color: #4b5563 !important; /* Cor #4b5563 conforme solicitado */
+.text-gray-600, 
+.text-muted-foreground, 
+button span:last-child {
+  color: #4b5563 !important;
 }
 
-/* Estilo para garantir que o azul corporativo #283578 seja aplicado corretamente */
+/* Helper para o azul corporativo #283578 */
 .text-corporate-blue {
   color: #283578;
 }
