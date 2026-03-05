@@ -86,7 +86,7 @@ export default function Step4Workflow({ data = { benefits: "", rows: [] }, updat
       {/* 2. CARD DE BENEFÍCIOS */}
       <Card>
         <CardHeader>
-          <CardTitle style={{ color: CORPORATE_BLUE }}>Benefícios Esperados <span className="text-red-500">*</span></CardTitle>
+          <CardTitle style={{ color: CORPORATE_BLUE }}>Expectativa do cliente <span className="text-red-500">*</span></CardTitle>
         </CardHeader>
         <CardContent>
           <Textarea
