@@ -95,7 +95,7 @@ export default function MappingLayout() {
             <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
               <FileCheck className="w-10 h-10" />
             </div>
-            <img src="logo-audaces.png" alt="Audaces" className="h-30 mx-auto mb-4 object-contain" />
+            <img src="logo-audaces.png" alt="Audaces" className="h-20 mx-auto mb-4 object-contain" />
             <h1 className="text-2xl font-bold mb-2" style={{ color: CORPORATE_BLUE }}>Mapeamento Finalizado!</h1>
             <p className="text-gray-600 mb-8">Todos os dados foram coletados com sucesso. Gere agora o seu PDF.</p>
             
@@ -117,7 +117,7 @@ export default function MappingLayout() {
         {/* ESTRUTURA PARA O PDF (Oculta na tela, visível apenas na impressão) */}
         <div className="hidden print:block bg-white w-full">
             <div className="p-12 border-b-4 mb-8" style={{ borderColor: CORPORATE_BLUE }}>
-               <img src="logo-audaces.png" alt="Audaces" className="h-30 mb-4 object-contain" />
+               <img src="logo-audaces.png" alt="Audaces" className="h-20 mb-4 object-contain" />
                <p className="text-xl font-bold" style={{ color: CORPORATE_BLUE }}>Relatório de Mapeamento de Dados ERP</p>
                <p className="text-xs text-gray-400 mt-2">Gerado em: {new Date().toLocaleDateString('pt-BR')}</p>
             </div>
