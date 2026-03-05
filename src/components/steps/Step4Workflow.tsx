@@ -106,7 +106,7 @@ export default function Step4Workflow({ data = { benefits: "", rows: [] }, updat
             <TableBody>
               {rows.map((row: any, i: number) => {
                 const isRequired = i < 3;
-                const inputClass = isRequired ? "pr-6 border-orange-200" : "";
+                const inputClass = isRequired ? "pr-6 border-orange-200 shadow-sm" : "";
                 
                 return (
                   <TableRow key={i}>
@@ -137,7 +137,6 @@ export default function Step4Workflow({ data = { benefits: "", rows: [] }, updat
                       />
                       {isRequired && <span className="absolute right-4 top-1/2 -translate-y-1/2 text-red-500 font-bold">*</span>}
                     </TableCell>
-                    {/* ADICIONADO AQUI: Asterisco e Borda para Dados Envolvidos */}
                     <TableCell className="p-2 relative">
                       <Input 
                         placeholder="Dados..." 
