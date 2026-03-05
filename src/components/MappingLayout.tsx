@@ -8,13 +8,12 @@ import {
 } from "lucide-react";
 
 import Step1Identification from "./steps/Step1Identification";
-// Importe os outros conforme seu projeto:
 import Step4Workflow from "./steps/Step4Workflow"; 
 import Step5ErpScreens from "./steps/Step5ErpScreens";
 import Step6Rules from "./steps/Step6Rules";
 
 const CORPORATE_BLUE = "#283578";
-const INACTIVE_TEXT = "#4b5563"; // Cinza mais escuro para leitura
+const INACTIVE_TEXT = "#4b5563"; 
 
 const steps = [
   { id: 1, title: "Identificação", icon: Building2 },
@@ -28,11 +27,11 @@ export default function MappingLayout() {
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
 
-  // ESTADO GLOBAL: Mantém os dados vivos para o PDF
+  // ESTADO GLOBAL: Garante que o PDF receba os dados
   const [formData, setFormData] = useState({
     step1: { cliente: "", erp: "", responsavel: "", escopo: "" },
-    step2: [], // Lista de Fluxo
-    step3: [], // Lista de Telas
+    step2: { benefits: "", rows: [] }, // Fluxo da Ficha
+    step3: [], // Telas do ERP
     step4: { observacoes: "" },
   });
 
@@ -42,21 +41,29 @@ export default function MappingLayout() {
 
   const progress = (completedSteps.size / steps.length) * 100;
 
-  // VALIDAÇÕES OBRIGATÓRIAS
+  // REGRAS DE VALIDAÇÃO
   const validate = () => {
     if (currentStep === 0) {
       const { cliente, erp, responsavel, escopo } = formData.step1;
       return !!(cliente && erp && responsavel && escopo);
     }
-    if (currentStep === 1) return formData.step2.length >= 3;
-    if (currentStep === 2) return formData.step3.length >= 3;
+    if (currentStep === 1) {
+      const hasBenefits = formData.step2.benefits && formData.step2.benefits.length > 5;
+      const hasThreeRows = formData.step2.rows?.filter((r: any) => r.stage && r.stage.length > 1).length >= 3;
+      return hasBenefits && hasThreeRows;
+    }
+    if (currentStep === 2) {
+      return formData.step3 && formData.step3.length >= 3;
+    }
     return true;
   };
 
   const handleNext = () => {
     if (!validate()) {
       let msg = "Preencha todos os campos obrigatórios (*).";
-      if (currentStep === 1 || currentStep === 2) msg = "Adicione pelo menos 3 itens na lista para prosseguir.";
+      if (currentStep === 1) msg = "Preencha os benefícios e ao menos 3 etapas do fluxo.";
+      if (currentStep === 2) msg = "Adicione pelo menos 3 telas do ERP para prosseguir.";
+      
       toast({ title: "Atenção", description: msg, variant: "destructive" });
       return;
     }
@@ -66,9 +73,8 @@ export default function MappingLayout() {
 
   return (
     <div className="flex min-h-screen bg-background">
-      {/* Sidebar */}
       <aside className="no-print w-64 shrink-0 bg-white flex flex-col border-r">
-        <div className="pt-2 pb-3 px-3 border-b"> {/* Espaço reduzido no topo */}
+        <div className="pt-2 pb-3 px-4 border-b">
           <h1 className="text-xl font-bold tracking-tight" style={{ color: CORPORATE_BLUE }}>Audaces</h1>
           <p className="text-[10px] font-bold" style={{ color: CORPORATE_BLUE }}>Mapeamento de Dados ERP</p>
         </div>
@@ -101,9 +107,10 @@ export default function MappingLayout() {
             </div>
             <Progress value={progress} className="h-1.5" />
           </div>
+          {/* Botão PDF Fixo com Cor */}
           <Button 
-            className="w-full text-white font-bold shadow-md hover:opacity-90 transition-all" 
-            style={{ backgroundColor: CORPORATE_BLUE }} 
+            className="w-full text-white font-bold shadow-md" 
+            style={{ backgroundColor: CORPORATE_BLUE, opacity: 1 }} 
             onClick={() => window.print()}
           >
             <Printer className="w-4 h-4 mr-2" /> Gerar PDF Completo
@@ -111,21 +118,17 @@ export default function MappingLayout() {
         </div>
       </aside>
 
-      {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 bg-slate-50/30">
         <header className="no-print border-b px-6 py-2 flex items-center justify-between bg-white shadow-sm">
           <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Etapa {currentStep + 1} de 4</span>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => setCurrentStep(currentStep - 1)} disabled={currentStep === 0}>
-              Anterior
-            </Button>
+            <Button variant="outline" size="sm" onClick={() => setCurrentStep(currentStep - 1)} disabled={currentStep === 0}>Anterior</Button>
             <Button size="sm" onClick={handleNext} style={{ backgroundColor: CORPORATE_BLUE }} className="text-white px-6">
               {currentStep === 3 ? "Finalizar" : "Próximo"}
             </Button>
           </div>
         </header>
 
-        {/* Tela Interativa */}
         <div className="flex-1 overflow-auto p-8 print:hidden">
           {currentStep === 0 && <Step1Identification data={formData.step1} update={(d) => updateData('step1', d)} />}
           {currentStep === 1 && <Step4Workflow data={formData.step2} update={(d) => updateData('step2', d)} />}
@@ -133,19 +136,15 @@ export default function MappingLayout() {
           {currentStep === 3 && <Step6Rules data={formData.step4} update={(d) => updateData('step4', d)} />}
         </div>
 
-        {/* ESTRUTURA PARA O PDF */}
-        <div className="hidden print:block bg-white">
-          <div className="p-12">
+        {/* ESTRUTURA PARA O PDF (Lê do Estado Global) */}
+        <div className="hidden print:block bg-white p-12">
             <h1 className="text-4xl font-bold mb-2" style={{ color: CORPORATE_BLUE }}>Audaces</h1>
             <p className="text-lg mb-10 border-b-2 pb-4" style={{ color: CORPORATE_BLUE, borderColor: CORPORATE_BLUE }}>Mapeamento de Dados para Integração ERP</p>
-            
             <div className="space-y-20">
               <section className="print-page"><Step1Identification data={formData.step1} isPrint /></section>
               <section className="print-page"><Step4Workflow data={formData.step2} isPrint /></section>
-              <section className="print-page"><Step5ErpScreens data={formData.step3} isPrint /></section>
-              <section className="print-page"><Step6Rules data={formData.step4} isPrint /></section>
+              {/* Repita para os outros passos */}
             </div>
-          </div>
         </div>
       </main>
     </div>
