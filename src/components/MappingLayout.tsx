@@ -40,7 +40,7 @@ export default function MappingLayout() {
   const [formData, setFormData] = useState({
     step1: { cliente: "", erp: "", responsavel: "", escopo: "" },
     step2: { benefits: "", rows: [] }, 
-    step3: [], 
+    step3: [], // Telas do ERP
     step4: { erpPrints: "", fichaModel: "", checklist: {} }, 
   });
 
@@ -57,28 +57,34 @@ export default function MappingLayout() {
       return !!(d.cliente && d.erp && d.responsavel && d.escopo);
     }
     
-    // Validação Step 2: Fluxo da Ficha (Step 4 no arquivo)
+    // Validação Step 2: Fluxo da Ficha
     if (currentStep === 1) {
       const d = formData.step2;
       const benefitsOk = d.benefits && d.benefits.trim().length > 0;
-      
-      // Valida se as 3 primeiras linhas têm as 4 colunas obrigatórias preenchidas
       const rowsOk = d.rows?.filter((r: any, index: number) => {
-        if (index >= 3) return false; // Só validamos as 3 primeiras
+        if (index >= 3) return false; 
         return (
           r.stage?.trim().length > 0 && 
           r.system?.trim().length > 0 && 
           r.area?.trim().length > 0 && 
-          r.data?.trim().length > 0 // Agora valida "Dados Envolvidos"
+          r.data?.trim().length > 0
         );
       }).length >= 3;
-
       return benefitsOk && rowsOk;
     }
 
-    // Validação Step 3: Telas do ERP (Step 5 no arquivo)
+    // Validação Step 3: Telas do ERP (Obrigatório todas as colunas nas 3 primeiras linhas)
     if (currentStep === 2) {
-      return formData.step3 && formData.step3.length >= 3;
+      const d = formData.step3;
+      const rowsOk = d?.filter((r: any) => {
+        return (
+          r.tela?.trim().length > 0 && 
+          r.campo?.trim().length > 0 && 
+          r.tipo?.trim().length > 0 && 
+          r.obrigatorio?.trim().length > 0
+        );
+      }).length >= 3;
+      return rowsOk;
     }
     
     return true;
@@ -88,7 +94,7 @@ export default function MappingLayout() {
     if (!validate()) {
       let msg = "Preencha todos os campos obrigatórios (*).";
       if (currentStep === 1) msg = "Preencha os benefícios e as 4 colunas das 3 primeiras etapas do fluxo.";
-      if (currentStep === 2) msg = "Adicione pelo menos 3 telas do ERP para prosseguir.";
+      if (currentStep === 2) msg = "Preencha todas as colunas das 3 primeiras telas do ERP.";
       
       toast({ title: "Atenção", description: msg, variant: "destructive" });
       return;
@@ -107,7 +113,6 @@ export default function MappingLayout() {
   if (isFinished) {
     return (
       <>
-        {/* TELA DE SUCESSO - Oculta na impressão pelo 'no-print' */}
         <div className="no-print flex flex-col items-center justify-center min-h-screen bg-slate-50 p-6 animate-in zoom-in duration-300">
           <div className="bg-white p-10 rounded-xl shadow-xl border border-slate-200 text-center max-w-lg w-full">
             <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -134,7 +139,6 @@ export default function MappingLayout() {
           </div>
         </div>
 
-        {/* ESTRUTURA PARA O PDF - Oculta na tela, visível apenas na impressão */}
         <div className="hidden print:block bg-white w-full">
             <div className="p-12 border-b-4 mb-8" style={{ borderColor: CORPORATE_BLUE }}>
                <img src="logo-audaces.png" alt="Audaces" className="h-20 mb-4 object-contain" />
@@ -151,13 +155,12 @@ export default function MappingLayout() {
     );
   }
 
-  // --- VISUALIZACAO DO FORMULÁRIO (NAVEGAÇÃO) ---
   return (
     <div className="flex min-h-screen bg-background">
       <aside className="no-print w-64 shrink-0 bg-white flex flex-col border-r shadow-sm">
-        <div className="pt-4 pb-3 px-4 border-b">
-          <img src="logo-audaces.png" alt="Audaces" className="h-8 w-auto mb-2 object-contain" />
-          <p className="text-[14px] font-bold" style={{ color: CORPORATE_BLUE }}>Mapeamento de Dados ERP</p>
+        <div className="pt-6 pb-4 px-4 border-b">
+          <img src="logo-audaces.png" alt="Audaces" className="h-14 w-auto mb-2 object-contain" />
+          <p className="text-sm font-bold tracking-tight" style={{ color: CORPORATE_BLUE }}>Mapeamento de Dados ERP</p>
         </div>
         <nav className="flex-1 p-4 space-y-1">
           {steps.map((step, i) => {
@@ -180,7 +183,7 @@ export default function MappingLayout() {
         </nav>
         <div className="p-4 border-t space-y-3 bg-slate-50">
           <div className="space-y-1">
-            <div className="flex justify-between text-[10px] font-bold text-gray-500 uppercase">
+            <div className="flex justify-between text-[10px] font-bold text-gray-500 uppercase tracking-widest">
               <span>Progresso</span>
               <span>{Math.round(progress)}%</span>
             </div>
@@ -196,11 +199,12 @@ export default function MappingLayout() {
         <header className="no-print border-b px-6 py-2 flex items-center justify-between bg-white shadow-sm z-10">
           <span className="text-[10px] font-bold text-gray-400 tracking-widest uppercase">Etapa {currentStep + 1} de 4</span>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => setCurrentStep(currentStep - 1)} disabled={currentStep === 0}>
-              Anterior
+            <Button variant="outline" size="sm" onClick={() => setCurrentStep(currentStep - 1)} disabled={currentStep === 0} className="text-xs">
+              <ChevronLeft className="w-4 h-4 mr-1" /> Anterior
             </Button>
-            <Button size="sm" onClick={handleNext} style={{ backgroundColor: CORPORATE_BLUE }} className="text-white px-6 font-bold shadow-md hover:opacity-90">
+            <Button size="sm" onClick={handleNext} style={{ backgroundColor: CORPORATE_BLUE }} className="text-white px-6 font-bold shadow-md hover:opacity-90 transition-all text-xs">
               {currentStep === 3 ? "Finalizar Mapeamento" : "Próximo"}
+              {currentStep < 3 && <ChevronRight className="w-4 h-4 ml-1" />}
             </Button>
           </div>
         </header>
