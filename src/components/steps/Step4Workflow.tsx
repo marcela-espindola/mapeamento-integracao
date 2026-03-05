@@ -31,26 +31,74 @@ export default function Step4Workflow({ data = { benefits: "", rows: [] }, updat
     update({ ...data, benefits: val });
   };
 
+  // --- LOGICA EXCLUSIVA PARA O PDF ---
+  if (isPrint) {
+    // Filtra apenas as linhas que possuem a "Etapa" preenchida para não imprimir linhas vazias
+    const filledRows = rows.filter((r: any) => r.stage && r.stage.trim() !== "");
+
+    return (
+      <div className="space-y-8">
+        <div className="border-b-2 pb-2" style={{ borderColor: CORPORATE_BLUE }}>
+          <h2 className="text-xl font-bold" style={{ color: CORPORATE_BLUE }}>2. Fluxo da Ficha e Benefícios</h2>
+        </div>
+
+        <div className="space-y-2">
+          <h3 className="font-bold text-sm" style={{ color: CORPORATE_BLUE }}>Benefícios Esperados:</h3>
+          <p className="text-sm whitespace-pre-wrap text-slate-700">{data.benefits || "Não informado"}</p>
+        </div>
+
+        <div className="space-y-4">
+          <h3 className="font-bold text-sm" style={{ color: CORPORATE_BLUE }}>Fluxo do Cliente:</h3>
+          <Table>
+            <TableHeader>
+              <TableRow className="border-b border-slate-300">
+                <TableHead className="text-black font-bold">Etapa</TableHead>
+                <TableHead className="text-black font-bold">Sistema</TableHead>
+                <TableHead className="text-black font-bold">Área</TableHead>
+                <TableHead className="text-black font-bold">Dados</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filledRows.length > 0 ? (
+                filledRows.map((row: any, i: number) => (
+                  <TableRow key={i} className="border-b border-slate-100">
+                    <TableCell className="font-medium text-slate-900">{row.stage}</TableCell>
+                    <TableCell className="text-slate-700">{row.system}</TableCell>
+                    <TableCell className="text-slate-700">{row.area}</TableCell>
+                    <TableCell className="text-slate-700">{row.data}</TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center text-slate-400 italic py-4">Nenhuma etapa preenchida</TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
+    );
+  }
+
+  // --- LAYOUT ORIGINAL PARA A TELA ---
   return (
     <div className="max-w-5xl mx-auto space-y-6">
-      {/* 1. CARD DE INSTRUÇÕES (Original) */}
-      {!isPrint && (
-        <Card className="border-primary/20 bg-primary/5">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2" style={{ color: CORPORATE_BLUE }}>
-              <GitBranch className="w-5 h-5" />
-              Instruções
-            </CardTitle>
-            <CardDescription>
-              Descreva os benefícios esperados com a integração e mapeie o fluxo completo da ficha
-              técnica no cliente — desde a criação do modelo até a ordem de produção.
-            </CardDescription>
-          </CardHeader>
-        </Card>
-      )}
+      {/* 1. CARD DE INSTRUÇÕES */}
+      <Card className="border-primary/20 bg-primary/5">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2" style={{ color: CORPORATE_BLUE }}>
+            <GitBranch className="w-5 h-5" />
+            Instruções
+          </CardTitle>
+          <CardDescription>
+            Descreva os benefícios esperados com a integração e mapeie o fluxo completo da ficha
+            técnica no cliente — desde a criação do modelo até a ordem de produção.
+          </CardDescription>
+        </CardHeader>
+      </Card>
 
-      {/* 2. CARD DE BENEFÍCIOS (Original + Validação) */}
-      <Card className={isPrint ? "border-none shadow-none" : ""}>
+      {/* 2. CARD DE BENEFÍCIOS */}
+      <Card>
         <CardHeader>
           <CardTitle style={{ color: CORPORATE_BLUE }}>
             Benefícios Esperados <span className="text-red-500">*</span>
@@ -64,53 +112,50 @@ export default function Step4Workflow({ data = { benefits: "", rows: [] }, updat
             rows={5}
             value={data.benefits || ""}
             onChange={(e) => handleBenefitsChange(e.target.value)}
-            placeholder="Ex: Eliminação do retrabalho na digitação de fichas técnicas..."
-            className={isPrint ? "border-none p-0" : ""}
+            placeholder="Ex: Eliminação do retrabalho na digitação de fichas técnicas, redução de erros na transferência de dados..."
           />
         </CardContent>
       </Card>
 
-      {/* 3. EXEMPLO ILUSTRATIVO (LAYOUT ORIGINAL RESTAURADO + CORREÇÃO DE COR) */}
-      {!isPrint && (
-        <Card className="border-accent/30 bg-accent/5">
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2" style={{ color: CORPORATE_BLUE }}>
-              📋 Exemplo Ilustrativo (apenas referência)
-            </CardTitle>
-            <CardDescription className="text-slate-700 font-medium">
-              Esta tabela é apenas um <strong>exemplo genérico</strong> para servir de inspiração. 
-              <strong> Preencha o fluxo real do cliente na tabela editável logo abaixo ↓</strong>
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="text-slate-900 font-bold">Etapa</TableHead>
-                  <TableHead className="text-slate-900 font-bold">Sistema</TableHead>
-                  <TableHead className="text-slate-900 font-bold">Área</TableHead>
-                  <TableHead className="text-slate-900 font-bold">Dados Envolvidos</TableHead>
-                  <TableHead className="text-slate-900 font-bold">Observações</TableHead>
+      {/* 3. EXEMPLO ILUSTRATIVO (Cor do texto corrigida para não ficar branca) */}
+      <Card className="border-accent/30 bg-accent/5">
+        <CardHeader>
+          <CardTitle className="text-base text-slate-900 font-bold flex items-center gap-2">
+             📋 Exemplo Ilustrativo (apenas referência)
+          </CardTitle>
+          <CardDescription className="text-slate-700 font-medium">
+            Esta tabela é apenas um <strong>exemplo genérico</strong> para servir de inspiração. 
+            <strong> Preencha o fluxo real do cliente na tabela editável logo abaixo ↓</strong>
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="text-slate-900 font-bold">Etapa</TableHead>
+                <TableHead className="text-slate-900 font-bold">Sistema</TableHead>
+                <TableHead className="text-slate-900 font-bold">Área</TableHead>
+                <TableHead className="text-slate-900 font-bold">Dados Envolvidos</TableHead>
+                <TableHead className="text-slate-900 font-bold">Observações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {exampleRows.map((row) => (
+                <TableRow key={row.stage} className="text-sm border-accent/20">
+                  <TableCell className="font-bold text-slate-800">{row.stage}</TableCell>
+                  <TableCell className="text-slate-700">{row.system}</TableCell>
+                  <TableCell className="text-slate-700">{row.area}</TableCell>
+                  <TableCell className="text-slate-700">{row.data}</TableCell>
+                  <TableCell className="text-slate-500 italic">{row.obs}</TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {exampleRows.map((row) => (
-                  <TableRow key={row.stage} className="text-sm border-accent/20">
-                    <TableCell className="font-bold text-slate-800">{row.stage}</TableCell>
-                    <TableCell className="text-slate-700">{row.system}</TableCell>
-                    <TableCell className="text-slate-700">{row.area}</TableCell>
-                    <TableCell className="text-slate-700">{row.data}</TableCell>
-                    <TableCell className="text-slate-500 italic">{row.obs}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      )}
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
 
-      {/* 4. TABELA EDITÁVEL (Original + Sincronização de Dados) */}
-      <Card className={isPrint ? "border-none shadow-none" : ""}>
+      {/* 4. TABELA EDITÁVEL */}
+      <Card>
         <CardHeader>
           <CardTitle style={{ color: CORPORATE_BLUE }}>
             Fluxo do Cliente <span className="text-red-500">*</span>
