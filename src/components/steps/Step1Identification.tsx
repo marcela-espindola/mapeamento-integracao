@@ -110,7 +110,7 @@ export default function Step1Identification({ data = {}, update, isPrint }: any)
               {!isPrint && <FieldHelp text="Módulos que serão integrados." />}
             </Label>
             <Textarea 
-              placeholder="Ex: Integração da ficha técnica completa..." 
+              placeholder="Integração da ficha técnica completa entre o ERP e o Audaces, incluindo produto, materiais, grade, consumo, sequência operacional e custos." 
               value={data.escopo || ""} 
               onChange={(e) => handleChange("escopo", e.target.value)}
               className={isPrint ? "border-none px-0" : "min-h-[100px]"}
