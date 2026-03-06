@@ -4,13 +4,30 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Monitor, Plus, Ban } from "lucide-react";
+import { Monitor, Plus, Ban, HelpCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const CORPORATE_BLUE = "#283578";
+
+// --- COMPONENTE DE AJUDA (TOOLTIP) ---
+function FieldHelp({ text }: { text: string }) {
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <HelpCircle className="w-3.5 h-3.5 text-muted-foreground cursor-help inline ml-1.5" />
+        </TooltipTrigger>
+        <TooltipContent side="top" className="max-w-[280px] text-xs bg-slate-800 text-white p-2">
+          <p>{text}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
 
 const categories = [
   { key: "produto", label: "Produto", fields: ["Referência", "Descrição", "Coleção", "Linha", "Grupo", "Subgrupo"] },
@@ -63,7 +80,6 @@ export default function Step5ErpScreens({ data = { rows: [], skipped: {} }, upda
     update({ rows: updated, skipped });
   };
 
-  // --- LAYOUT EXCLUSIVO PARA O PDF (PÁGINA 3) ---
   if (isPrint) {
     return (
       <div className="space-y-8">
@@ -83,7 +99,7 @@ export default function Step5ErpScreens({ data = { rows: [], skipped: {} }, upda
               ) : catRows.length > 0 ? (
                 <Table>
                   <TableHeader>
-                    <TableRow className="border-b border-slate-300">
+                    <TableRow>
                       <TableHead className="text-black font-bold text-xs">Módulo / Tela</TableHead>
                       <TableHead className="text-black font-bold text-xs">Campo no ERP</TableHead>
                       <TableHead className="text-black font-bold text-xs text-right">Tipo / Obrig.</TableHead>
@@ -111,16 +127,15 @@ export default function Step5ErpScreens({ data = { rows: [], skipped: {} }, upda
     );
   }
 
-  // --- LAYOUT PARA A TELA ---
   return (
     <div className="max-w-5xl mx-auto space-y-4 md:space-y-6 px-1 md:px-0">
-      <Card className="border-primary/20 bg-primary/5 no-print">
+      <Card className="border-primary/20 bg-primary/5 no-print text-sm">
         <CardHeader className="p-4 md:pb-3">
           <CardTitle className="text-sm md:text-base flex items-center gap-2" style={{ color: CORPORATE_BLUE }}>
             <Monitor className="w-4 h-4 md:w-5 md:h-5" /> Instruções
           </CardTitle>
           <CardDescription className="text-xs md:text-sm">
-            Liste as telas e campos. As 3 primeiras linhas de cada aba são obrigatórias.
+            Navegue pelas abas e mapeie os campos do ERP. Se não houver integração para um item, use o check de exclusão.
           </CardDescription>
         </CardHeader>
       </Card>
@@ -158,10 +173,31 @@ export default function Step5ErpScreens({ data = { rows: [], skipped: {} }, upda
                       <Table className="min-w-[700px]">
                         <TableHeader className="bg-slate-50">
                           <TableRow>
-                            <TableHead className="text-slate-900 text-xs py-2">Módulo / Tela</TableHead>
-                            <TableHead className="text-slate-900 text-xs py-2">Campo no ERP</TableHead>
-                            <TableHead className="text-slate-900 text-xs py-2">Tipo de Dado</TableHead>
-                            <TableHead className="w-24 text-slate-900 text-xs py-2 text-center">Obrig.</TableHead>
+                            {/* CABEÇALHOS COM TOOLTIP */}
+                            <TableHead className="text-slate-900 text-xs">
+                              <div className="flex items-center">
+                                Módulo / Tela <span className="text-red-500 ml-0.5">*</span>
+                                <FieldHelp text="Nome do menu ou tela dentro do ERP parceiro." />
+                              </div>
+                            </TableHead>
+                            <TableHead className="text-slate-900 text-xs">
+                              <div className="flex items-center">
+                                Campo no ERP <span className="text-red-500 ml-0.5">*</span>
+                                <FieldHelp text="Nome técnico ou da etiqueta do campo no sistema parceiro." />
+                              </div>
+                            </TableHead>
+                            <TableHead className="text-slate-900 text-xs">
+                              <div className="flex items-center">
+                                Tipo de Dado <span className="text-red-500 ml-0.5">*</span>
+                                <FieldHelp text="Natureza da informação (Texto, Número, Data, etc)." />
+                              </div>
+                            </TableHead>
+                            <TableHead className="w-24 text-slate-900 text-xs">
+                              <div className="flex items-center justify-center">
+                                Obrig. <span className="text-red-500 ml-0.5">*</span>
+                                <FieldHelp text="Indique se o campo é obrigatório para salvar o registro no ERP." />
+                              </div>
+                            </TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -174,22 +210,22 @@ export default function Step5ErpScreens({ data = { rows: [], skipped: {} }, upda
                             return (
                               <TableRow key={i}>
                                 <TableCell className="p-2 relative min-w-[180px]">
-                                  <Input value={row.tela || ""} onChange={(e) => handleInputChange(i, "tela", e.target.value)} className={inputClass} />
+                                  <Input value={row.tela || ""} onChange={(e) => handleInputChange(i, "tela", e.target.value)} className={inputClass} disabled={isCatSkipped} />
                                   {isRequired && <span className="absolute right-4 top-1/2 -translate-y-1/2 text-red-500 font-bold text-xs">*</span>}
                                 </TableCell>
                                 <TableCell className="p-2 relative min-w-[180px]">
-                                  <Input value={row.campo || ""} onChange={(e) => handleInputChange(i, "campo", e.target.value)} className={inputClass} />
+                                  <Input value={row.campo || ""} onChange={(e) => handleInputChange(i, "campo", e.target.value)} className={inputClass} disabled={isCatSkipped} />
                                   {isRequired && <span className="absolute right-4 top-1/2 -translate-y-1/2 text-red-500 font-bold text-xs">*</span>}
                                 </TableCell>
                                 <TableCell className="p-2 relative min-w-[140px]">
-                                  <Select value={row.tipo || ""} onValueChange={(v) => handleInputChange(i, "tipo", v)}>
+                                  <Select value={row.tipo || ""} onValueChange={(v) => handleInputChange(i, "tipo", v)} disabled={isCatSkipped}>
                                     <SelectTrigger className={inputClass}><SelectValue placeholder="Tipo" /></SelectTrigger>
                                     <SelectContent>{dataTypes.map((t) => (<SelectItem key={t} value={t}>{t}</SelectItem>))}</SelectContent>
                                   </Select>
                                   {isRequired && <span className="absolute right-8 top-1/2 -translate-y-1/2 text-red-500 font-bold text-xs z-10">*</span>}
                                 </TableCell>
                                 <TableCell className="p-2 relative min-w-[100px]">
-                                  <Select value={row.obrigatorio || ""} onValueChange={(v) => handleInputChange(i, "obrigatorio", v)}>
+                                  <Select value={row.obrigatorio || ""} onValueChange={(v) => handleInputChange(i, "obrigatorio", v)} disabled={isCatSkipped}>
                                     <SelectTrigger className={inputClass}><SelectValue placeholder="S/N" /></SelectTrigger>
                                     <SelectContent><SelectItem value="S">Sim</SelectItem><SelectItem value="N">Não</SelectItem></SelectContent>
                                   </Select>
@@ -201,7 +237,7 @@ export default function Step5ErpScreens({ data = { rows: [], skipped: {} }, upda
                         </TableBody>
                       </Table>
                     </div>
-                    <Button variant="outline" size="sm" className="mt-4 w-full border-dashed text-xs" onClick={() => addRow(cat.key, cat.label)}>
+                    <Button variant="outline" size="sm" className="mt-4 w-full border-dashed text-xs py-5" onClick={() => addRow(cat.key, cat.label)} disabled={isCatSkipped}>
                       <Plus className="w-4 h-4 mr-1" /> Adicionar linha em {cat.label}
                     </Button>
                   </div>
