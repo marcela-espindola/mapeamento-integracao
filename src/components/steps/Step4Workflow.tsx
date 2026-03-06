@@ -2,9 +2,27 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { GitBranch } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { GitBranch, Info, HelpCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const CORPORATE_BLUE = "#283578";
+
+// --- COMPONENTE DE AJUDA (TOOLTIP) DEFINIDO AQUI ---
+function FieldHelp({ text }: { text: string }) {
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <HelpCircle className="w-3.5 h-3.5 text-muted-foreground cursor-help inline ml-1.5" />
+        </TooltipTrigger>
+        <TooltipContent side="top" className="max-w-[280px] text-xs bg-slate-800 text-white p-2">
+          <p>{text}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
 
 const exampleRows = [
   { stage: "Criação do Modelo", system: "Audaces Isa/Idea", area: "Estilo / Design", data: "Croqui, referência, coleção, linha", obs: "Dados iniciais do produto" },
@@ -86,8 +104,8 @@ export default function Step4Workflow({ data = { benefits: "", rows: [] }, updat
       {/* 2. CARD DE BENEFÍCIOS */}
       <Card>
         <CardHeader className="p-4 md:p-6">
-          <CardTitle className="text-base md:text-lg" style={{ color: CORPORATE_BLUE }}>
-            Expectativa do cliente <span className="text-red-500">*</span>
+          <CardTitle className="text-base md:text-lg flex items-center" style={{ color: CORPORATE_BLUE }}>
+            Expectativa do cliente <span className="text-red-500 ml-1">*</span>
             <FieldHelp text="Descreva qual problema a integração deve resolver e quais resultados o cliente espera obter no processo" />
           </CardTitle>
         </CardHeader>
@@ -102,7 +120,7 @@ export default function Step4Workflow({ data = { benefits: "", rows: [] }, updat
         </CardContent>
       </Card>
 
-      {/* 3. EXEMPLO ILUSTRATIVO - Com Scroll Horizontal no Mobile */}
+      {/* 3. EXEMPLO ILUSTRATIVO */}
       <Card className="border-accent/30 bg-accent/5">
         <CardHeader className="p-4 md:p-6">
           <CardTitle className="text-sm md:text-base text-slate-900 font-bold flex items-center gap-2">
@@ -132,17 +150,14 @@ export default function Step4Workflow({ data = { benefits: "", rows: [] }, updat
               </TableBody>
             </Table>
           </div>
-          <div className="md:hidden text-[9px] text-center text-slate-400 py-2 italic">
-            Arraste para o lado para ver mais →
-          </div>
         </CardContent>
       </Card>
 
-      {/* 4. TABELA EDITÁVEL - Com Scroll Horizontal no Mobile */}
+      {/* 4. TABELA EDITÁVEL */}
       <Card>
         <CardHeader className="p-4 md:p-6">
-          <CardTitle className="text-base md:text-lg" style={{ color: CORPORATE_BLUE }}>
-            Fluxo do Cliente <span className="text-red-500">*</span>
+          <CardTitle className="text-base md:text-lg flex items-center" style={{ color: CORPORATE_BLUE }}>
+            Fluxo do Cliente <span className="text-red-500 ml-1">*</span>
             <FieldHelp text="Informe na tabela o fluxo do processo no cliente, detalhando sistema de origem, sistema de destino e dados integrados em cada etapa." />
           </CardTitle>
           <CardDescription className="text-xs">As 4 primeiras colunas das 3 primeiras linhas são obrigatórias</CardDescription>
@@ -162,7 +177,7 @@ export default function Step4Workflow({ data = { benefits: "", rows: [] }, updat
               <TableBody>
                 {rows.map((row: any, i: number) => {
                   const isRequired = i < 3;
-                  const inputClass = `text-xs h-9 ${isRequired ? "pr-6 border-orange-200 shadow-sm" : ""}`;
+                  const inputClass = cn("text-xs h-9", isRequired && "pr-6 border-orange-200 shadow-sm");
                   
                   return (
                     <TableRow key={i}>
@@ -215,9 +230,6 @@ export default function Step4Workflow({ data = { benefits: "", rows: [] }, updat
                 })}
               </TableBody>
             </Table>
-          </div>
-          <div className="md:hidden text-[9px] text-center text-slate-400 py-2 italic border-t">
-            Arraste a tabela para o lado para preencher todas as colunas →
           </div>
         </CardContent>
       </Card>
