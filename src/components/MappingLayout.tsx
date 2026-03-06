@@ -127,7 +127,7 @@ export default function MappingLayout() {
               <div className="flex items-start gap-3 p-4 rounded-lg bg-blue-50 border border-blue-100">
                 <AlertCircle className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-xs font-bold text-blue-800 uppercase tracking-widest mb-1">(Lembrete)</p>
+                  <p className="text-xs font-bold text-blue-800 uppercase tracking-widest mb-1">Lembrete</p>
                   <p className="text-xs text-blue-700 leading-relaxed">
                     Não esqueça de <strong>anexar o PDF</strong> que você gerou no Passo 1 dentro do formulário do Insights para que a equipe de integração receba o mapeamento completo.
                   </p>
