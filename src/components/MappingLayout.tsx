@@ -133,7 +133,6 @@ export default function MappingLayout() {
                   </p>
                 </div>
               </div>
-            </div>
 
               {/* PASSO 2: INSIGHTS */}
               <div className="p-4 rounded-lg border border-slate-100 bg-slate-50/50">
@@ -152,6 +151,9 @@ export default function MappingLayout() {
                   </Button>
                 </div>
               </div>
+              
+            </div>
+            
             <Button variant="ghost" className="text-gray-400 text-xs" onClick={() => setIsFinished(false)}>
               Revisar ou editar dados do mapeamento
             </Button>
