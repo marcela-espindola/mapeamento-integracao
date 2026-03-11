@@ -90,14 +90,14 @@ export default function Step1Identification({ data = {}, update, isPrint }: any)
           </CardTitle>
         </CardHeader>
         <CardContent className="p-4 md:p-6 grid gap-4 md:gap-6 grid-cols-1 md:grid-cols-2">
-          
+          https://chatgpt.com/deep-research
           <div className="space-y-2">
             <Label className="font-bold text-sm flex items-center">
               Cliente <span className="text-red-500 ml-1">*</span>
               <FieldHelp text="Nome da empresa/marca do cliente final." />
             </Label>
             <Input 
-              placeholder="Ex: Malwee, Hering..." 
+              placeholder="Ex: Confecções Audaces" 
               value={data.cliente || ""} 
               onChange={(e) => handleChange("cliente", e.target.value)}
               className="h-11 border-slate-300"
@@ -157,7 +157,7 @@ export default function Step1Identification({ data = {}, update, isPrint }: any)
           <div className="space-y-2">
             <Label className="font-bold text-sm flex items-center">
               Implantador Responsável <span className="text-red-500 ml-1">*</span>
-              <FieldHelp text="Nome do consultor Audaces." />
+              <FieldHelp text="Nome do implantador/Farmer Audaces que realizou o mapeamento." />
             </Label>
             <Input 
               placeholder="Nome do implantador" 
